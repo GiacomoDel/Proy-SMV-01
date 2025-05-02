@@ -1,21 +1,58 @@
+"use client";
+import '../styles/Chat.css';
+
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
-import { Button, Placeholder, View } from "@aws-amplify/ui-react";
-import { amplifyClient } from "@/app/amplify-utils";
-
-// Types
-type Message = {
-  role: string;
-  content: { text: string }[];
-};
-
-type Conversation = Message[];
+import { sendMessageToAgent } from "@/app/lib/apiClient";
+import { ChatSession, Message } from "../types";
+import Sidebar from "./Sidebar";
+import { v4 as uuidv4 } from "uuid";
+import { useUser } from "@/app/lib/UserContext";
+import { useRouter } from "next/navigation";
 
 export function Chat() {
-  const [conversation, setConversation] = useState<Conversation>([]);
+  const { user, logout } = useUser();
+  const router = useRouter();
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [currentSessionId, setCurrentSessionId] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const messagesRef = useRef(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const LOCAL_STORAGE_KEY = `chat_sessions_${user.username}`;
+    const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed: ChatSession[] = JSON.parse(stored);
+        if (parsed.length > 0) {
+          setSessions(parsed);
+          setCurrentSessionId(parsed[0].id);
+          return;
+        }
+      } catch {
+        console.warn("Error parsing stored sessions.");
+      }
+    }
+
+    const newSession = createNewSession();
+    setSessions([newSession]);
+    setCurrentSessionId(newSession.id);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([newSession]));
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const LOCAL_STORAGE_KEY = `chat_sessions_${user.username}`;
+    if (sessions.length > 0) {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(sessions));
+    }
+  }, [sessions, user]);
+
+  const currentSession = sessions.find((s) => s.id === currentSessionId);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setError("");
@@ -24,97 +61,170 @@ export function Chat() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!currentSession) {
+      return setError("No hay sesión activa.");
+    }
     if (inputValue.trim()) {
       const message = setNewUserMessage();
       fetchChatResponse(message);
     }
   };
 
-  const fetchChatResponse = async (message: Message) => {
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+  };
+
+  const setNewUserMessage = (): Message => {
+    const newMessage: Message = {
+      role: "user",
+      content: [{ text: inputValue }],
+    };
+
+    setSessions((prev) =>
+      prev.map((session) =>
+        session.id === currentSessionId
+          ? {
+              ...session,
+              conversation: [...session.conversation, newMessage],
+              title:
+                session.conversation.length === 0
+                  ? inputValue.slice(0, 20) + "..."
+                  : session.title,
+            }
+          : session
+      )
+    );
+
     setInputValue("");
+    return newMessage;
+  };
+
+  const fetchChatResponse = async (message: Message) => {
     setIsLoading(true);
-
     try {
-      const { data, errors } = await amplifyClient.queries.chat({
-        conversation: JSON.stringify([...conversation, message]),
-      });
+      const response = await sendMessageToAgent([
+        ...currentSession!.conversation,
+        message,
+      ]);
 
-      if (!errors && data) {
-        setConversation((prevConversation) => [
-          ...prevConversation,
-          JSON.parse(data),
-        ]);
-      } else {
-        throw new Error(errors?.[0].message || "An unknown error occurred.");
-      }
+      const reply: Message = {
+        role: "assistant",
+        content: [{ text: response.body }],
+      };
+
+      setSessions((prev) =>
+        prev.map((session) =>
+          session.id === currentSessionId
+            ? {
+                ...session,
+                conversation: [...session.conversation, reply],
+              }
+            : session
+        )
+      );
     } catch (err) {
       setError((err as Error).message);
-      console.error("Error fetching chat response:", err);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    const lastMessage = conversation[conversation.length - 1];
-    console.log("lastMessage", lastMessage);
-    (
-      messagesRef.current as HTMLDivElement | null
-    )?.lastElementChild?.scrollIntoView();
-  }, [conversation]);
+    messagesRef.current?.lastElementChild?.scrollIntoView();
+  }, [currentSession]);
 
-  const setNewUserMessage = (): Message => {
-    const newUserMessage: Message = {
-      role: "user",
-      content: [{ text: inputValue }],
-    };
-    setConversation((prevConversation) => [
-      ...prevConversation,
-      newUserMessage,
-    ]);
+  const createNewSession = (): ChatSession => ({
+    id: uuidv4(),
+    title: "Nuevo Chat",
+    conversation: [],
+  });
 
-    setInputValue("");
-    return newUserMessage;
+  const handleCreateNewSession = () => {
+    const newSession = createNewSession();
+    setSessions((prev) => [...prev, newSession]);
+    setCurrentSessionId(newSession.id);
+  };
+
+  const handleSelectSession = (id: string) => {
+    setCurrentSessionId(id);
+  };
+
+  const handleDeleteSession = (id: string) => {
+    const updatedSessions = sessions.filter((s) => s.id !== id);
+    setSessions(updatedSessions);
+    if (id === currentSessionId) {
+      if (updatedSessions.length > 0) {
+        setCurrentSessionId(updatedSessions[0].id);
+      } else {
+        const newSession = createNewSession();
+        setSessions([newSession]);
+        setCurrentSessionId(newSession.id);
+      }
+    }
+  };
+
+  const handleRenameSession = (id: string, newTitle: string) => {
+    setSessions((prev) =>
+      prev.map((session) =>
+        session.id === id ? { ...session, title: newTitle } : session
+      )
+    );
   };
 
   return (
-    <View className="chat-container">
-      <View className="messages" ref={messagesRef}>
-        {conversation.map((msg, index) => (
-          <View key={index} className={`message ${msg.role}`}>
-            {msg.content[0].text}
-          </View>
-        ))}
-      </View>
-      {isLoading && (
-        <View className="loader-container">
-          <p>Thinking...</p>
-
-          <Placeholder size="large" />
-        </View>
-      )}
-
-      <form onSubmit={handleSubmit} className="input-container">
-        <input
-          name="prompt"
-          value={inputValue}
-          onChange={handleInputChange}
-          placeholder="Type your message..."
-          className="input"
-          type="text"
+    <div className="snc-container">
+      <div className="sidebar-section">
+        <Sidebar
+          sessions={sessions}
+          currentSessionId={currentSessionId}
+          onSelectSession={handleSelectSession}
+          onCreateSession={handleCreateNewSession}
+          onDeleteSession={handleDeleteSession}
+          onRenameSession={handleRenameSession}
         />
-        <Button
-          type="submit"
-          className="send-button"
-          isDisabled={isLoading}
-          loadingText="Sending..."
-        >
-          Send
-        </Button>
-      </form>
+      </div>
 
-      {error ? <View className="error-message">{error}</View> : null}
-    </View>
+      <div className="main-section">
+        <div className="top-bar">
+          <h1>Chat Asistente SMV</h1>
+          <div className="right-section">
+            <span>{user?.name}</span>
+            <button className="logout-button" onClick={handleLogout}>
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+
+        <div className="chat-container">
+          <div className="messages" ref={messagesRef}>
+            {currentSession?.conversation.map((msg, index) => (
+              <div key={index} className={`message ${msg.role}`}>
+                <span className={msg.role === "user" ? "icon-user" : "icon-ai"}></span>
+                {msg.content[0].text}
+              </div>
+            ))}
+          </div>
+
+          {isLoading && <div className="typing-indicator">Pensando...</div>}
+
+          <form onSubmit={handleSubmit} className="input-container">
+            <input
+              value={inputValue}
+              onChange={handleInputChange}
+              placeholder="Escribe tu mensaje..."
+              className="input"
+              type="text"
+            />
+            <button type="submit" disabled={isLoading || !currentSession}>
+              {isLoading ? "Enviando..." : "Enviar"}
+            </button>
+          </form>
+
+          {error && <div className="error-message">{error}</div>}
+        </div>
+      </div>
+    </div>
   );
 }
 

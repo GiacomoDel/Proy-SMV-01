@@ -1,28 +1,21 @@
-"use client";
-import { Button, View, Heading, Flex, Text } from "@aws-amplify/ui-react";
-import Chat from "@/components/Chat";
-import { useAuthenticator } from "@aws-amplify/ui-react";
+'use client';
+
+import Chat from "../components/Chat";
+import { useUser } from "@/app/lib/UserContext";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
-  const { user, signOut } = useAuthenticator();
+  const { user } = useUser();
+  const router = useRouter();
 
-  return (
-    <View className="app-container">
-      <Flex
-        as="header"
-        justifyContent="space-between"
-        alignItems="center"
-        padding="1rem"
-      >
-        <Text fontWeight="bold">{user?.signInDetails?.loginId}</Text>
-        <Heading level={3}>Travel Personal Assistant</Heading>
-        <Button onClick={signOut} size="small" variation="destructive">
-          Sign out
-        </Button>
-      </Flex>
-      <View as="main">
-        <Chat />
-      </View>
-    </View>
-  );
+  useEffect(() => {
+    if (!user) {
+      router.push("/login");
+    }
+  }, [user, router]);
+
+  if (!user) return null;
+
+  return <Chat />;
 }
