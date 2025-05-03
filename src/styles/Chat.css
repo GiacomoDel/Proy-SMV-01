@@ -340,3 +340,61 @@ body, html {
   margin-top: 0.5rem;
   text-align: center;
 }
+
+/* Botón del menú (menu-button) */
+.menu-button {
+  background: none; /* Sin fondo */
+  border: none; /* Sin bordes */
+  color: #333; /* Color del ícono */
+  font-size: 1.2rem; /* Tamaño del ícono */
+  cursor: pointer; /* Cambia el cursor al pasar el mouse */
+  padding: 0.5rem; /* Espaciado interno */
+  border-radius: 50%; /* Forma circular */
+  transition: background-color 0.2s ease, transform 0.2s ease; /* Animación */
+}
+
+.menu-button:hover {
+  background-color: rgba(0, 0, 0, 0.1); /* Fondo gris claro al pasar el mouse */
+  transform: scale(1.1); /* Aumenta ligeramente el tamaño */
+}
+
+/* Estilos para el menú desplegable */
+.dropdown {
+  position: absolute;
+  top: 100%; /* Aparece justo debajo del botón */
+  right: 0;
+  background-color: #2c2c2c; /* Fondo oscuro */
+  border-radius: 0.5rem;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2);
+  padding: 0.5rem 0;
+  z-index: 10;
+  min-width: 150px; /* Ancho mínimo */
+}
+
+/* Botones dentro del dropdown */
+.dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown button:hover {
+  background-color: #444444; /* Fondo más claro al pasar el mouse */
+}
+
+.dropdown button:last-child {
+  color: #ff4d4d; /* Color rojo para el botón de eliminar */
+}
+
+.dropdown button:last-child:hover {
+  background-color: #661111; /* Fondo rojo oscuro al pasar el mouse */
+}

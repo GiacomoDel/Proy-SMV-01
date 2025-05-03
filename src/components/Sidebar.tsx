@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { ChatSession } from "../types";
 import '../styles/Chat.css';
 import Image from 'next/image';
-import { FiHome, FiMoreHorizontal, FiEdit2, FiTrash2 } from "react-icons/fi"; // Elimina FiShare2 si ya no se usa
+import { FiHome, FiMoreHorizontal, FiEdit2, FiTrash2 } from "react-icons/fi"; // Importa íconos adicionales
 
 interface SidebarProps {
   sessions: ChatSession[];
