@@ -6,7 +6,8 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useUser } from '@/app/lib/UserContext';
-//import '../../styles/Login.css';
+import Image from 'next/image'; // Importa el componente de imágenes de Next.js
+import '../../styles/Login.css'; // Importa los estilos
 
 const hardcodedUsers = {
   usersmv01: { password: 'Smv2025@#', name: 'Usuario smv 01' },
@@ -52,6 +53,14 @@ export default function LoginPage() {
 
   return (
     <div className="login-container">
+      {/* Imagen del logo */}
+      <Image
+        src="/smv.png" // Ruta de la imagen
+        alt="Logo SMV"
+        width={210}
+        height={150}
+        className="login-logo"
+      />
       <h2>Iniciar Sesión</h2>
       <input
         placeholder="Usuario"

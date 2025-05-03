@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { ChatSession } from "../types";
 import '../styles/Chat.css';
 import Image from 'next/image';
-import { FiHome, FiMoreHorizontal } from 'react-icons/fi';
+import { FiHome, FiMoreHorizontal, FiEdit2, FiTrash2 } from "react-icons/fi"; // Elimina FiShare2 si ya no se usa
+
 interface SidebarProps {
   sessions: ChatSession[];
   currentSessionId: string;
@@ -60,8 +61,14 @@ const Sidebar: React.FC<SidebarProps> = ({
               </button>
               {openMenuId === session.id && (
                 <div className="dropdown">
-                  <button onClick={() => handleRename(session.id)}>Renombrar</button>
-                  <button onClick={() => onDeleteSession(session.id)}>Eliminar</button>
+                  <button onClick={() => handleRename(session.id)}>
+                    <FiEdit2 />
+                    Renombrar
+                  </button>
+                  <button onClick={() => onDeleteSession(session.id)}>
+                    <FiTrash2 />
+                    Eliminar
+                  </button>
                 </div>
               )}
             </div>
@@ -70,9 +77,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Logo SMV + línea blanca */}
-      <div>
-      <img src="/smv.png" alt="Logo SMV" width={165} height={100} className="sidebar-logo" />
-      <hr className="sidebar-divider" />
+      <div className="sidebar-footer">
+        <img src="/smv.png" alt="Logo SMV" width={165} height={100} className="sidebar-logo" />
+        <hr className="sidebar-divider" />
       </div>
     </div>
   );

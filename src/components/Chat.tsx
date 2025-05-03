@@ -70,6 +70,16 @@ export function Chat() {
     }
   };
 
+  const handleButtonClick = () => {
+    if (!currentSession) {
+      return setError("No hay sesión activa.");
+    }
+    if (inputValue.trim()) {
+      const message = setNewUserMessage();
+      fetchChatResponse(message);
+    }
+  };
+
   const handleLogout = () => {
     logout();
     router.push("/login");
@@ -197,6 +207,29 @@ export function Chat() {
         </div>
 
         <div className="chat-container">
+          {/* Input-container arriba de messages */}
+          <div className="input-container">
+            <label className="input-label">¿Qué quieres hacer?</label>
+            <div className="input-wrapper">
+              <input
+                value={inputValue}
+                onChange={handleInputChange}
+                placeholder="Escribe tu mensaje..."
+                className="input"
+                type="text"
+              />
+              <button
+                type="button" // Cambia a "button" para evitar conflictos con el formulario
+                disabled={isLoading || !currentSession}
+                className="send-button"
+                onClick={handleButtonClick} // Usa la nueva función
+              >
+                {isLoading ? "Enviando..." : "Enviar"}
+              </button>
+            </div>
+          </div>
+
+          {/* Contenedor de mensajes */}
           <div className="messages" ref={messagesRef}>
             {currentSession?.conversation.map((msg, index) => (
               <div key={index} className={`message ${msg.role}`}>
@@ -207,19 +240,6 @@ export function Chat() {
           </div>
 
           {isLoading && <div className="typing-indicator">Pensando...</div>}
-
-          <form onSubmit={handleSubmit} className="input-container">
-            <input
-              value={inputValue}
-              onChange={handleInputChange}
-              placeholder="Escribe tu mensaje..."
-              className="input"
-              type="text"
-            />
-            <button type="submit" disabled={isLoading || !currentSession}>
-              {isLoading ? "Enviando..." : "Enviar"}
-            </button>
-          </form>
 
           {error && <div className="error-message">{error}</div>}
         </div>
