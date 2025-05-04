@@ -53,28 +53,32 @@ export default function LoginPage() {
 
   return (
     <div className="login-container">
-      {/* Imagen del logo */}
-      <Image
-        src="/smv.png" // Ruta de la imagen
-        alt="Logo SMV"
-        width={210}
-        height={150}
-        className="login-logo"
-      />
-      <h2>Iniciar Sesión</h2>
-      <input
-        placeholder="Usuario"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <input
-        placeholder="Clave"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button onClick={handleLogin}>Ingresar</button>
-      {error && <p className="error">{error}</p>}
+      {/* Contenedor del formulario */}
+      <div className="login-form">
+        <Image
+          src="/smv.png" // Ruta de la imagen
+          alt="Logo SMV"
+          width={150}
+          height={100}
+          className="login-logo"
+        />
+        <h2>Iniciar Sesión</h2>
+        <input
+          placeholder="Usuario"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+          placeholder="Clave"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button onClick={handleLogin}>Ingresar</button>
+        {error && <p className="error">{error}</p>}
+      </div>
+
+
     </div>
   );
 }

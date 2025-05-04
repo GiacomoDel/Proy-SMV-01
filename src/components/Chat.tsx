@@ -8,6 +8,7 @@ import Sidebar from "./Sidebar";
 import { v4 as uuidv4 } from "uuid";
 import { useUser } from "@/app/lib/UserContext";
 import { useRouter } from "next/navigation";
+import { FiLogOut, FiEdit2 } from "react-icons/fi";
 
 export function Chat() {
   const { user, logout } = useUser();
@@ -17,6 +18,10 @@ export function Chat() {
   const [inputValue, setInputValue] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [renameValue, setRenameValue] = useState("");
   const messagesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -182,6 +187,13 @@ export function Chat() {
     );
   };
 
+  const confirmDelete = () => {
+    if (currentSessionId) {
+      handleDeleteSession(currentSessionId);
+      setShowDeleteConfirmation(false);
+    }
+  };
+
   return (
     <div className="snc-container">
       <div className="sidebar-section">
@@ -199,9 +211,12 @@ export function Chat() {
         <div className="top-bar">
           <h1>Chat Asistente SMV</h1>
           <div className="right-section">
-            <span>{user?.name}</span>
-            <button className="logout-button" onClick={handleLogout}>
-              Cerrar sesión
+            <span>Usuario: {user?.username}</span> {/* Muestra el nombre del usuario */}
+            <button
+              className="logout-button"
+              onClick={() => setShowLogoutConfirmation(true)} // Muestra el cuadro de confirmación
+            >
+              <FiLogOut />
             </button>
           </div>
         </div>
@@ -214,6 +229,11 @@ export function Chat() {
               <input
                 value={inputValue}
                 onChange={handleInputChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleButtonClick(); // Llama a la función para enviar el mensaje
+                  }
+                }}
                 placeholder="Escribe tu mensaje..."
                 className="input"
                 type="text"
@@ -229,6 +249,9 @@ export function Chat() {
             </div>
           </div>
 
+          {/* Separador visual */}
+          <hr className="separator" />
+
           {/* Contenedor de mensajes */}
           <div className="messages" ref={messagesRef}>
             {currentSession?.conversation.map((msg, index) => (
@@ -238,12 +261,107 @@ export function Chat() {
               </div>
             ))}
           </div>
-
-          {isLoading && <div className="typing-indicator">Pensando...</div>}
+          {isLoading && (
+            <div className="typing-indicator">
+              Pensando
+              <span className="dot"></span>
+              <span className="dot"></span>
+              <span className="dot"></span>
+            </div>
+          )}
+  {/* Separador visual */}
+  <hr className="separator2" />
+      
 
           {error && <div className="error-message">{error}</div>}
         </div>
       </div>
+      {/* Fondo oscuro con opacidad */}
+      {(showLogoutConfirmation || showDeleteConfirmation) && (
+        <div className="overlay show"></div>
+      )}
+
+      {/* Cuadro de confirmación para cerrar sesión */}
+      {showLogoutConfirmation && (
+        <div className="confirmation-modal show">
+          <h2>¿Cerrar sesión?</h2>
+          <p>¿Estás seguro de que deseas cerrar sesión?</p>
+          <div className="modal-buttons">
+            <button
+              className="cancel-button"
+              onClick={() => setShowLogoutConfirmation(false)} // Cierra el cuadro de confirmación
+            >
+              Cancelar
+            </button>
+            <button
+              className="delete-button"
+              onClick={handleLogout} // Llama a la función de logout
+            >
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Cuadro de confirmación para eliminar chat */}
+      {showDeleteConfirmation && (
+        <div className="confirmation-modal show">
+          <h2>¿Eliminar el chat?</h2>
+          <p>Esto eliminará el chat seleccionado de forma permanente.</p>
+          <div className="modal-buttons">
+            <button
+              className="cancel-button"
+              onClick={() => setShowDeleteConfirmation(false)} // Cierra el cuadro de confirmación
+            >
+              Cancelar
+            </button>
+            <button
+              className="delete-button"
+              onClick={confirmDelete} // Llama a la función de eliminación
+            >
+              Borrar
+            </button>
+          </div>
+        </div>
+      )}
+
+
+
+      {/* Fondo oscuro con opacidad */}
+      {showRenameModal && (
+        <div className="overlay show"></div>
+      )}
+
+      {/* Cuadro de renombrar sesión */}
+      {showRenameModal && (
+        <div className="rename-modal show">
+          <h2>Renombrar</h2>
+          <input
+            type="text"
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            placeholder="Nuevo nombre"
+            className="rename-input"
+          />
+          <div className="modal-buttons">
+            <button
+              className="cancel-button"
+              onClick={() => setShowRenameModal(false)} // Cierra el recuadro
+            >
+              Cancelar
+            </button>
+            <button
+              className="rename-button"
+              onClick={() => {
+                handleRenameSession(currentSessionId, renameValue); // Renombra la sesión
+                setShowRenameModal(false); // Cierra el recuadro
+              }}
+            >
+              Renombrar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
