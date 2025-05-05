@@ -1,12 +1,22 @@
-export async function sendMessageToAgent(conversation: any[]) {
+export async function sendMessageToAgent(
+  conversation: any[],
+  username: string
+) {
   try {
-    // Obtenemos el último mensaje del usuario para usar como input directo
     const lastUserMessage = conversation
       .slice()
       .reverse()
       .find((msg) => msg.role === "user");
 
     const userInput = lastUserMessage?.content?.[0]?.text || "Hola";
+
+    const requestBody = {
+      input: userInput,
+      sessionId: "default-session",
+      username: username, // Enviar el nombre del usuario
+    };
+
+    console.log("📤 Enviando solicitud al backend:", requestBody);
 
     const response = await fetch(
       "https://oy9fpzccbb.execute-api.us-east-1.amazonaws.com/prod/chat",
@@ -15,10 +25,7 @@ export async function sendMessageToAgent(conversation: any[]) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          input: userInput,
-          sessionId: "default-session", // podrías hacer esto dinámico si quieres
-        }),
+        body: JSON.stringify(requestBody),
       }
     );
 

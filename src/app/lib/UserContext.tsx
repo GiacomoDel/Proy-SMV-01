@@ -29,7 +29,7 @@ interface UserProviderProps {
 export const UserProvider: FC<UserProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  const login = (user: User) => setUser(user);
+  const login = (user: User) => setUser(user); // Asegúrate de que el username se pase correctamente
   const logout = () => setUser(null);
 
   return (

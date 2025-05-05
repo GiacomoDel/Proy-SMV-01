@@ -116,12 +116,19 @@ export function Chat() {
   };
 
   const fetchChatResponse = async (message: Message) => {
+    if (!user || !user.username) {
+      console.error("❌ Usuario no definido o sin username.");
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const response = await sendMessageToAgent([
-        ...currentSession!.conversation,
-        message,
-      ]);
+      const response = await sendMessageToAgent(
+        [...currentSession!.conversation, message],
+        user.username
+      );
+
+      console.log("✅ Respuesta del backend:", response.body);
 
       const reply: Message = {
         role: "assistant",

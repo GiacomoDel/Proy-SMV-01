@@ -244,7 +244,7 @@ body, html {
   color: #fff;
   transition: background-color 0.2s;
   width: 90%; /* Ajusta el ancho de cada entrada */
-  max-width: 500px; /* Limita el ancho máximo */
+  max-width: 90%; /* En lugar de 500px */
   height: auto; /* Ajusta automáticamente el alto */
 }
 
@@ -715,4 +715,9 @@ body, html {
   margin: 1rem 0; /* Espaciado vertical */
   width: 90%; /* Ancho relativo */
   align-self: center; /* Centrado horizontal */
+}
+
+img {
+  max-width: 100%;
+  height: auto;
 }

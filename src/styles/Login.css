@@ -101,3 +101,18 @@
     transform: translateY(0);
   }
 }
+
+/* Media query para pantallas pequeñas */
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column; /* Cambia a columna en pantallas pequeñas */
+  }
+
+  .login-form {
+    width: 90%; /* Ajusta el ancho */
+  }
+
+  .login-image img {
+    max-width: 100%; /* Asegura que la imagen no desborde */
+  }
+}

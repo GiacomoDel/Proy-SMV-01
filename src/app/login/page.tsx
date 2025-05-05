@@ -30,7 +30,7 @@ export default function LoginPage() {
     const user = hardcodedUsers[username as keyof typeof hardcodedUsers];
 
     if (user && user.password === password) {
-      login({ username, name: user.name });
+      login({ username, name: user.name }); // Asegúrate de que el username se pase aquí
       const userKey = `chat_sessions_${username}`;
       const storedSessions = localStorage.getItem(userKey);
 
@@ -38,16 +38,16 @@ export default function LoginPage() {
         const defaultSession = [
           {
             id: crypto.randomUUID(),
-            title: 'Nuevo Chat',
+            title: "Nuevo Chat",
             conversation: [],
           },
         ];
         localStorage.setItem(userKey, JSON.stringify(defaultSession));
       }
 
-      router.push('/');
+      router.push("/");
     } else {
-      setError('Usuario o clave incorrecta');
+      setError("Usuario o clave incorrecta");
     }
   };
 
