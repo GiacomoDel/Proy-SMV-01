@@ -1,6 +1,6 @@
 "use client";
 import '../styles/Chat.css';
-
+import Markdown from 'react-markdown'; // Importa el componente de Markdown
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import { sendMessageToAgent } from "@/app/lib/apiClient";
 import { ChatSession, Message } from "../types";
@@ -264,13 +264,13 @@ export function Chat() {
             {currentSession?.conversation.map((msg, index) => (
               <div key={index} className={`message ${msg.role}`}>
                 <span className={msg.role === "user" ? "icon-user" : "icon-ai"}></span>
-                {msg.content[0].text}
+                <Markdown>{msg.content[0].text}</Markdown>
               </div>
             ))}
           </div>
           {isLoading && (
             <div className="typing-indicator">
-              Pensando
+              Procesando
               <span className="dot"></span>
               <span className="dot"></span>
               <span className="dot"></span>
