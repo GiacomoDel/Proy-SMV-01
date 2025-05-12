@@ -1,6 +1,7 @@
 "use client";
 import '../styles/Chat.css';
 import Markdown from 'react-markdown'; // Importa el componente de Markdown
+import ReactMarkdown from 'react-markdown';
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import { sendMessageToAgent } from "@/app/lib/apiClient";
 import { ChatSession, Message } from "../types";
@@ -9,6 +10,14 @@ import { v4 as uuidv4 } from "uuid";
 import { useUser } from "@/app/lib/UserContext";
 import { useRouter } from "next/navigation";
 import { FiLogOut, FiEdit2 } from "react-icons/fi";
+
+const components = {
+  a: ({ href, children, ...props }: React.HTMLProps<HTMLAnchorElement>) => (
+    <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
+      {children}
+    </a>
+  ),
+};
 
 export function Chat() {
   const { user, logout } = useUser();
@@ -264,7 +273,7 @@ export function Chat() {
             {currentSession?.conversation.map((msg, index) => (
               <div key={index} className={`message ${msg.role}`}>
                 <span className={msg.role === "user" ? "icon-user" : "icon-ai"}></span>
-                <Markdown>{msg.content[0].text}</Markdown>
+                <Markdown components={components}>{msg.content[0].text}</Markdown>
               </div>
             ))}
           </div>
