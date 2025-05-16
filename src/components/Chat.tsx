@@ -270,12 +270,15 @@ export function Chat() {
 
           {/* Contenedor de mensajes */}
           <div className="messages" ref={messagesRef}>
-            {currentSession?.conversation.map((msg, index) => (
-              <div key={index} className={`message ${msg.role}`}>
-                <span className={msg.role === "user" ? "icon-user" : "icon-ai"}></span>
-                <Markdown components={components}>{msg.content[0].text}</Markdown>
-              </div>
-            ))}
+            {currentSession?.conversation.map((msg, index) => {
+              console.log("Mensaje recibido:", msg.content[0].text); // Agrega el console.log aquí
+              return (
+                <div key={index} className={`message ${msg.role}`}>
+                  <span className={msg.role === "user" ? "icon-user" : "icon-ai"}></span>
+                  <Markdown components={components}>{msg.content[0].text}</Markdown>
+                </div>
+              );
+            })}
           </div>
           {isLoading && (
             <div className="typing-indicator">
