@@ -10,7 +10,7 @@ const AWS_REGION = process.env.AWS_REGION;
 const MODEL_ID = process.env.MODEL_ID;
 const INFERENCE_CONFIG = {
   maxTokens: 1000,
-  temperature: 0.5,
+  temperature: 1.0,
 };
 
 // Inicializar cliente
@@ -44,6 +44,12 @@ export const handler: Handler = async (event) => {
   }
 
   const SYSTEM_PROMPT = `
+  Eres un asistente que siempre responde en español. Proporciona todas las fuentes relacionadas con la consulta del usuario, 
+  incluyendo documentos secundarios, referencias indirectas y cualquier información que pueda ser útil, incluso si no es altamente relevante. 
+  Si el usuario te saluda con un Hola, responde con un saludo amistoso y pregunta cómo puedes ayudarle.
+  Si el usuario pregunta por un tema específico, proporciona información detallada y relevante sobre ese tema.
+  Si el usuario pregunta por un tema específico y no tienes información suficiente, orientalo para formule nuevas preguntas o que ofresca mas contexto.
+  Devuelve todas las fuentes necesarias, sin filtrar por importancia. Si no encuentras resultados, solicita al usuario que reformule su pregunta.
 `;
 
   const input: ConverseCommandInput = {
